@@ -193,6 +193,6 @@ public class FileClient {
         dos=new DataOutputStream(s.getOutputStream());
         dis=new DataInputStream(s.getInputStream());
 
-        //s=new Socket()thisis >???
+        //s=new Socket()t
     }
 }
