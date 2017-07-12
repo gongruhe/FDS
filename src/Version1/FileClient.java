@@ -4,6 +4,7 @@ import java.net.*;
 import java.nio.file.*;
 /**
  * Created by 巩汝何 on 2017/7/11.
+ * 栗仁武 201592169
  */
 public class FileClient {
     Socket s;
