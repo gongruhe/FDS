@@ -192,6 +192,7 @@ public class FileClient {
         s = new Socket(address,Integer.parseInt(ports));
         dos=new DataOutputStream(s.getOutputStream());
         dis=new DataInputStream(s.getInputStream());
-        //s=new Socket()
+
+        //s=new Socket()thisis >???
     }
 }
