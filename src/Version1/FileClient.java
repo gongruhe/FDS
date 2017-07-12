@@ -63,7 +63,9 @@ public class FileClient {
         dos.writeInt(0);
         dos.writeChars(f.getName());//传文件名过去
         dos.writeLong(f.length());//传文件大小过去
+        dos.writeChars("helloworld");
         dos.flush();//强制输出缓存当中的数据
+        //adsf
         //开始
         String sb="";
         String ip1="",port1="",ip2="",port2="",uuid="";
