@@ -27,19 +27,28 @@ public class FileClient {
         dos = new DataOutputStream(s.getOutputStream());
         //br=new BufferedReader(dis);
     }
-
-    int GetHostPort() throws IOException {
-        String ports = "";
-        FileReader setFile = new FileReader("ClientSet.txt");
-        char c[] = new char[20];
-        int length = setFile.read(c);
-        for (int i = 0; i < c.length; i++) {
-            if (c[i] == ' ') {
-                for (int j = 0; j < i; j++) {
-                    host += c[j];
+    int  GetHostPort() throws IOException {
+        String ports="";
+        FileReader setFile=new FileReader("ClientSet.txt");
+        char c[]=new char[20];
+        int length=setFile.read(c);
+        for(int i=0;i<length;i++)
+        {
+            if(c[i]==' '){
+                for(int j=0;j<i;j++)
+                {
+                    host+=c[j];
                 }
-                for (int j = i + 1; j < c.length; j++) {
-                    ports += c[j];
+                for(int j=i+1;j<length;j++)
+                {
+                    if(c[j]==' ')
+                    {
+                        for(int k=i+1;k<j;k++)
+                            port+=c[k];
+                        for(int k=j+1;k<length;k++)
+                            UserName+=c[k];
+                    }
+
                 }
             }
         }
@@ -48,6 +57,11 @@ public class FileClient {
 
     public void main(String args[]) throws IOException {
         switch (args[0]) {
+
+    public void main(String args[]) throws Exception {
+        switch (args[0])
+        {
+
             case "upload"://在这里要调用文件上传程序
                 UpLoad(args[1]);
                 break;
@@ -60,13 +74,16 @@ public class FileClient {
         }
     }
 
-    public int UpLoad(String filepath) throws IOException {
-        File f = new File(filepath);
+
+    public int UpLoad(String filepath) throws Exception {
+        File f=new File(filepath);
+        String SendMessage="";
         //传输信息到文件服务器
         dos.writeInt(0);
-        dos.writeChars(f.getName());//传文件名过去
-        dos.writeLong(f.length());//传文件大小过去
+        SendMessage=""+UserName+","+f.getName()+","+f.length()+"#";
+        dos.writeChars(SendMessage);
         dos.flush();//强制输出缓存当中的数据
+        //adsf
         //开始
         String sb = "";
         String ip1 = "", port1 = "", ip2 = "", port2 = "", uuid = "";
@@ -92,12 +109,16 @@ public class FileClient {
         }
         s.close();//关闭与服务器端的连接
         CreateLinkToNode(ip1, port1);//建立与主节点的链接
-
-        if (f != null)//如果文件存在
-        {
-            FileInputStream fin = new FileInputStream(f);
-            byte[] sendByte = new byte[1024];
             dos.writeUTF(uuid);//传输文件名过去？
+            while((length = fin.read(sendByte, 0, sendByte.length))>0){
+                dos.write(sendByte,0,length);
+                dos.flush();
+            }
+            //然后关闭文件流和socket
+            fin.close();
+            dos.close();
+            s.close();
+            fsend.delete();//删除 加密后的文件
         }
         return 0;
     }
