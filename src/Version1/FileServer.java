@@ -25,7 +25,7 @@ public class FileServer {
     private ServerSocket serverSocket;
     private static Map<NodeInfo, StorageNode> nodeInfo = new HashMap<NodeInfo, StorageNode>();  //存储FileStorage服务器结点的信息
     private static Map<FileNum, FileInfo> fileSet = new HashMap<FileNum, FileInfo>();
-
+    private static List<String> userNames = new ArrayList<String>();
 
     public FileServer(ServerSocket serverSocket) {
         this.serverSocket = serverSocket;
@@ -43,14 +43,17 @@ public class FileServer {
             switch (command) {
                 case 0:
                     //上传文件
-                    StringBuilder fileName = new StringBuilder();
+                    String message = new String();
                     char c;
-                    while (-1 != (c = dis.readChar())) {
-                        fileName.append(c);
+                    while ((c = dis.readChar()) != '#') {
+                        message += c;
                     }
-                    Long fileLength = dis.readLong();
+                    String[] temp = message.split(",");
+                    userNames.add(temp[0]);
+                    String fileName = temp[1];
+                    String fileLength = temp[2];
                     FileNum num = new FileNum();
-                    FileInfo info = new FileInfo(fileName, fileLength);
+                    FileInfo info = new FileInfo(fileName, Long.parseLong(fileLength));
                     fileSet.put(num, info);
                     break;
                 case 1:
@@ -58,6 +61,14 @@ public class FileServer {
 
                     break;
             }
+        }
+    }
+
+    private StorageNode findFreeNode() {
+        StorageNode freeNode;
+        Iterator<StorageNode> iterator = nodes.iterator();
+        while (iterator.hasNext()) {
+            if ()
         }
     }
 

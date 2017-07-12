@@ -1,10 +1,12 @@
 package Version1;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Below project FDS
  * Created by Lee_rw on 2017/7/12.
  */
-public class NodeInfo {
+public class NodeInfo implements Comparable<NodeInfo> {
     private String name;
     private String ip;
     private int port;
@@ -124,5 +126,17 @@ public class NodeInfo {
         return name + "," + ip + "," + port + "," + capacity + "," + actualCapacity + "," +
                 actualCapacity + "," + remainCapacity + "," +
                 fileNum + "," + canUse;
+    }
+
+
+    @Override
+    public int compareTo(@NotNull NodeInfo o) {
+        if (this.remainCapacity > o.remainCapacity) {
+            return 1;
+        }
+        if (this.remainCapacity < o.remainCapacity) {
+            return -1;
+        }
+        return 0;
     }
 }

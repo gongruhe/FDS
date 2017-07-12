@@ -5,19 +5,19 @@ package Version1;
  * Created by Lee_rw on 2017/7/12.
  */
 public class FileInfo {
-    private StringBuilder fileName;
+    private String fileName;
     private long fileLength;
 
-    public FileInfo(StringBuilder fileName, Long fileLength) {
+    public FileInfo(String fileName, long fileLength) {
         this.fileName = fileName;
         this.fileLength = fileLength;
     }
 
-    public StringBuilder getFileName() {
+    public String getFileName() {
         return fileName;
     }
 
-    public void setFileName(StringBuilder fileName) {
+    public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
