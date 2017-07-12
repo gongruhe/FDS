@@ -57,12 +57,66 @@ public class FileClient {
                 UpLoad(args[1]);
                 break;
             case "remove":
-                ;
+                remove(args[1]);
                 break;
             case "download":
-                ;
+                download(args[1],args[2]);
                 break;
         }
+    }
+    public int remove(String uuid) throws IOException {
+        //传输命令到总服务器
+        dos.writeInt(1);
+        dos.writeChars(uuid);
+        dos.flush();
+        char c=dis.readChar();
+        if(c=='s')
+            System.out.println("Remove "+uuid+" succeed!");
+        else if(c=='f')
+            System.out.println("Remove "+uuid+" failed!");
+        return 0;
+    }
+    public int download(String uuid,String DestFile) throws IOException {
+        //传输下载文件的命令到总服务器
+        dos.writeInt(2);
+        dos.writeChars(uuid);
+        dos.flush();
+        String sb="";
+        String ip1="",port1="",ip2="",port2="";
+        char c;//服务器传输过来的数据格式"xxx.xxx.xxx.xxx 1234 xxx.xxx.xxx.xxx 1235q"
+        while((c=dis.readChar())!='q')
+        {
+            sb+=c;//获得主、次节点的端口和ip地址
+        }
+        int numofspace=0;//空格的数量
+        for(int i=0;i<sb.length();i++)//得到主次节点的ip和端口号
+        {
+            if(sb.charAt(i)==' ')
+                numofspace++;
+            if(numofspace==1)
+                ip1=sb.substring(0,i-1);
+            else if(numofspace==2)
+            {
+                port1=sb.substring(ip1.length(),i-1);
+            }
+            else if(numofspace==3)
+            {
+                ip2=sb.substring(ip1.length()+port1.length()+1,i-1);
+                port2=sb.substring(i+1,sb.length()-2);
+            }
+        }
+        s.close();//关闭与服务器端的连接
+        CreateLinkToNode(ip1,port1);//建立与主节点的链接
+        c=dis.readChar();
+        if(c=='y')
+        {
+            System.out.println("该节点存在该文件");
+            byte[] inputByte = null;
+            int length = 0;
+            FileOutputStream fout=new FileOutputStream(DestFile);
+
+        }
+        return 0;
     }
     public int UpLoad(String filepath) throws Exception {
         File f=new File(filepath);
@@ -126,6 +180,10 @@ public class FileClient {
             dos.close();
             s.close();
             fsend.delete();//删除 加密后的文件
+            FileWriter fw=new FileWriter("HasUpload.txt");
+            fw.write("已经上传成功的文件："+filepath+" uuid:"+uuid+System.lineSeparator());
+            fw.close();
+
         }
         return 0;
     }
@@ -133,7 +191,7 @@ public class FileClient {
         InetAddress address=Inet4Address.getByName(ip) ;
         s = new Socket(address,Integer.parseInt(ports));
         dos=new DataOutputStream(s.getOutputStream());
-
+        dis=new DataInputStream(s.getInputStream());
         //s=new Socket()
     }
 }
