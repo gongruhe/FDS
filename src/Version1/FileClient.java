@@ -66,15 +66,13 @@ public class FileClient {
                 UpLoad(args[1]);
                 break;
             case "remove":
-                ;
+                remove(args[1]);
                 break;
             case "download":
-                ;
+                download(args[1],args[2]);
                 break;
         }
     }
-
-
     public int UpLoad(String filepath) throws Exception {
         File f=new File(filepath);
         String SendMessage="";
@@ -119,15 +117,13 @@ public class FileClient {
             dos.close();
             s.close();
             fsend.delete();//删除 加密后的文件
+            FileWriter fw=new FileWriter("HasUpload.txt");
+            fw.write("已经上传成功的文件："+filepath+" uuid:"+uuid+System.lineSeparator());
+            fw.close();
+
         }
         return 0;
     }
-
-    public void CreateLinkToNode(String ip, String ports) throws IOException {
-        InetAddress address = Inet4Address.getByName(ip);
-        s = new Socket(address, Integer.parseInt(ports));
-        dos = new DataOutputStream(s.getOutputStream());
-
         //s=new Socket()
     }
 }
