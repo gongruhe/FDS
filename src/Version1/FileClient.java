@@ -29,22 +29,28 @@ public class FileClient {
         FileReader setFile=new FileReader("ClientSet.txt");
         char c[]=new char[20];
         int length=setFile.read(c);
-        for(int i=0;i<c.length;i++)
+        for(int i=0;i<length;i++)
         {
             if(c[i]==' '){
                 for(int j=0;j<i;j++)
                 {
                     host+=c[j];
                 }
-                for(int j=i+1;j<c.length;j++)
+                for(int j=i+1;j<length;j++)
                 {
-                    ports+=c[j];
+                    if(c[j]==' ')
+                    {
+                        for(int k=i+1;k<j;k++)
+                            port+=c[k];
+                        for(int k=j+1;k<length;k++)
+                            UserName+=c[k];
+                    }
                 }
             }
         }
         return Integer.parseInt(ports);
     }
-    public void main(String args[]) throws IOException {
+    public void main(String args[]) throws Exception {
         switch (args[0])
         {
             case "upload"://在这里要调用文件上传程序
@@ -58,13 +64,13 @@ public class FileClient {
                 break;
         }
     }
-    public int UpLoad(String filepath) throws IOException {
+    public int UpLoad(String filepath) throws Exception {
         File f=new File(filepath);
+        String SendMessage="";
         //传输信息到文件服务器
         dos.writeInt(0);
-        dos.writeChars(f.getName());//传文件名过去
-        dos.writeLong(f.length());//传文件大小过去
-        dos.writeChars("helloworld？？？？");
+        SendMessage=""+UserName+","+f.getName()+","+f.length()+"#";
+        dos.writeChars(SendMessage);
         dos.flush();//强制输出缓存当中的数据
         //adsf
         //开始
@@ -99,11 +105,27 @@ public class FileClient {
         s.close();//关闭与服务器端的连接
         CreateLinkToNode(ip1,port1);//建立与主节点的链接
 
+        //进行文件加密
+        FileEncryptAndDecrypt.encrypt(filepath,"12345",uuid);//新建了一个加密过后的文件
+        String path = f.getPath();
+        int index = path.lastIndexOf("\\");
+        String destFile = path.substring(0, index)+"\\"+uuid;//目标文件生成
+        File fsend =new File(destFile);
         if(f!=null)//如果文件存在
         {
-            FileInputStream fin=new FileInputStream(f);
+            int length;
+            FileInputStream fin=new FileInputStream(fsend);//传输文件
             byte[] sendByte=new byte[1024];
             dos.writeUTF(uuid);//传输文件名过去？
+            while((length = fin.read(sendByte, 0, sendByte.length))>0){
+                dos.write(sendByte,0,length);
+                dos.flush();
+            }
+            //然后关闭文件流和socket
+            fin.close();
+            dos.close();
+            s.close();
+            fsend.delete();//删除 加密后的文件
         }
         return 0;
     }
