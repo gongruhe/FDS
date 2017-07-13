@@ -1,151 +1,152 @@
 package Version1;
 /**
- * Created by ¹®ÈêºÎ on 2017/7/12.
+ * Created by å·©æ±ä½• on 2017/7/12.
  */
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
-public class FileEncryptAndDecrypt {
-    /**
-     * ÎÄ¼þfile½øÐÐ¼ÓÃÜ
-     * @param fileUrl ÎÄ¼þÂ·¾¶
-     * @param key ÃÜÂë
-     * @throws Exception
-     */
-    public static void encrypt(String fileUrl, String key,String DestFile) throws Exception {
-        File file = new File(fileUrl);//µÃµ½ÎÄ¼þµÄurl
-        String path = file.getPath();
-        if(!file.exists()){
-            return;
-        }
-        int index = path.lastIndexOf("\\");
-        //String destFile = path.substring(0, index)+"\\"+file.getName()+"-encrypted";//Ä¿±êÎÄ¼þÉú³É
-        String destFile = path.substring(0, index)+"\\"+DestFile;//Ä¿±êÎÄ¼þÉú³É
-        File dest = new File(destFile);
-        InputStream in = new FileInputStream(fileUrl);
-        OutputStream out = new FileOutputStream(destFile);
-        byte[] buffer = new byte[1024];
-        int r;
-        byte[] buffer2=new byte[1024];
-        while (( r= in.read(buffer)) > 0) {
-            for(int i=0;i<r;i++)
-            {
-                byte b=buffer[i];
-                buffer2[i]=b==255?0:++b;
+    public class FileEncryptAndDecrypt {
+        /**
+         * æ–‡ä»¶fileè¿›è¡ŒåŠ å¯†
+         * @param fileUrl æ–‡ä»¶è·¯å¾„
+         * @param key å¯†ç 
+         * @throws Exception
+         */
+        public static void encrypt(String fileUrl, String key,String DestFile) throws Exception {
+            File file = new File(fileUrl);//å¾—åˆ°æ–‡ä»¶çš„url
+            String path = file.getPath();
+            if(!file.exists()){
+                return;
             }
-            out.write(buffer2, 0, r);
-            out.flush();
+            int index = path.lastIndexOf("\\");
+            //String destFile = path.substring(0, index)+"\\"+file.getName()+"-encrypted";//ç›®æ ‡æ–‡ä»¶ç”Ÿæˆ
+            String destFile = path.substring(0, index)+"\\"+DestFile;//ç›®æ ‡æ–‡ä»¶ç”Ÿæˆ
+            File dest = new File(destFile);
+            InputStream in = new FileInputStream(fileUrl);
+            OutputStream out = new FileOutputStream(destFile);
+            byte[] buffer = new byte[1024];
+            int r;
+            byte[] buffer2=new byte[1024];
+            while (( r= in.read(buffer)) > 0) {
+                for(int i=0;i<r;i++)
+                {
+                    byte b=buffer[i];
+                    buffer2[i]=b==255?0:++b;
+                }
+                out.write(buffer2, 0, r);
+                out.flush();
+            }
+            in.close();
+            out.close();
+            // file.delete();//å› ä¸ºæˆ‘ä»¬å¹¶ä¸æƒ³åˆ é™¤æ–‡ä»¶æ‰€ä»¥å°±åŽ»æŽ‰è¿™å¥è¯
+            //dest.renameTo(new File(fileUrl));
+            //appendMethodA(fileUrl, key);
+            appendMethodA(destFile, key);//è¿™é‡Œå°±ç”Ÿæˆåˆ°ä¸€ä¸ªæ–°çš„æ–‡ä»¶å½“ä¸­å°±è¡Œäº†
+            System.out.println("åŠ å¯†æˆåŠŸ");
         }
-        in.close();
-        out.close();
-        // file.delete();//ÒòÎªÎÒÃÇ²¢²»ÏëÉ¾³ýÎÄ¼þËùÒÔ¾ÍÈ¥µôÕâ¾ä»°
-        //dest.renameTo(new File(fileUrl));
-        //appendMethodA(fileUrl, key);
-        appendMethodA(destFile, key);//ÕâÀï¾ÍÉú³Éµ½Ò»¸öÐÂµÄÎÄ¼þµ±ÖÐ¾ÍÐÐÁË
-        System.out.println("¼ÓÃÜ³É¹¦");
-    }
 
-    /**
-     *
-     * @param fileName
-     * @param content ÃÜÔ¿
-     */
-    public static void appendMethodA(String fileName, String content) {
-        try {
-            // ´ò¿ªÒ»¸öËæ»ú·ÃÎÊÎÄ¼þÁ÷£¬°´¶ÁÐ´·½Ê½
-            RandomAccessFile randomFile = new RandomAccessFile(fileName, "rw");
-            // ÎÄ¼þ³¤¶È£¬×Ö½ÚÊý
-            long fileLength = randomFile.length();
-            //½«Ð´ÎÄ¼þÖ¸ÕëÒÆµ½ÎÄ¼þÎ²¡£
-            randomFile.seek(fileLength);
-            randomFile.writeBytes(content);
-            randomFile.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        /**
+         *
+         * @param fileName
+         * @param content å¯†é’¥
+         */
+        public static void appendMethodA(String fileName, String content) {
+            try {
+                // æ‰“å¼€ä¸€ä¸ªéšæœºè®¿é—®æ–‡ä»¶æµï¼ŒæŒ‰è¯»å†™æ–¹å¼
+                RandomAccessFile randomFile = new RandomAccessFile(fileName, "rw");
+                // æ–‡ä»¶é•¿åº¦ï¼Œå­—èŠ‚æ•°
+                long fileLength = randomFile.length();
+                //å°†å†™æ–‡ä»¶æŒ‡é’ˆç§»åˆ°æ–‡ä»¶å°¾ã€‚
+                randomFile.seek(fileLength);
+                randomFile.writeBytes(content);
+                randomFile.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-    }
-    /**
-     * ½âÃÜ
-     * @param fileUrl Ô´ÎÄ¼þ
-     * @param tempUrl ÁÙÊ±ÎÄ¼þ
-    //* @param ketLength ÃÜÂë³¤¶È
-     * @return
-     * @throws Exception
-     */
-    public static String decrypt(String fileUrl, String tempUrl, int keyLength) throws Exception{
-        File file = new File(fileUrl);//ÕâÀïÊäÈëµÄ¿Ï¶¨ÊÇ¼ÓÃÜºóµÄÎÄ¼þ
-        if (!file.exists()) {
+        /**
+         * è§£å¯†
+         * @param fileUrl æºæ–‡ä»¶
+         * @param tempUrl ä¸´æ—¶æ–‡ä»¶
+         //* @param ketLength å¯†ç é•¿åº¦
+         * @return
+         * @throws Exception
+         */
+        public static String decrypt(String fileUrl, String tempUrl, int keyLength) throws Exception{
+            File file = new File(fileUrl);//è¿™é‡Œè¾“å…¥çš„è‚¯å®šæ˜¯åŠ å¯†åŽçš„æ–‡ä»¶
+            if (!file.exists()) {
 
-            return null;
-        }
-        File dest = new File(tempUrl);
-            /*if (!dest.getParentFile().exists()) {//Õâ¸öÊÇÓÃÀ´´´½¨ÐÂµÄÎÄ¼þ¼ÐµÄ
+                return null;
+            }
+            File dest = new File(tempUrl);
+            /*if (!dest.getParentFile().exists()) {//è¿™ä¸ªæ˜¯ç”¨æ¥åˆ›å»ºæ–°çš„æ–‡ä»¶å¤¹çš„
                 dest.getParentFile().mkdirs();
             }*/
 
-        InputStream is = new FileInputStream(fileUrl);
-        OutputStream out = new FileOutputStream(tempUrl);
+            InputStream is = new FileInputStream(fileUrl);
+            OutputStream out = new FileOutputStream(tempUrl);
 
-        byte[] buffer = new byte[1024];
-        byte[] buffer2=new byte[1024];
-        byte bMax=(byte)255;
-        long size = file.length() - keyLength;
-        int mod = (int) (size%1024);
-        int div = (int) (size>>10);
-        int count = mod==0?div:(div+1);
-        int k = 1, r;
-        while ((k <= count && ( r = is.read(buffer)) > 0)) {
-            if(mod != 0 && k==count) {
-                r =  mod;
-            }
+            byte[] buffer = new byte[1024];
+            byte[] buffer2=new byte[1024];
+            byte bMax=(byte)255;
+            long size = file.length() - keyLength;
+            int mod = (int) (size%1024);
+            int div = (int) (size>>10);
+            int count = mod==0?div:(div+1);
+            int k = 1, r;
+            while ((k <= count && ( r = is.read(buffer)) > 0)) {
+                if(mod != 0 && k==count) {
+                    r =  mod;
+                }
 
-            for(int i = 0;i < r;i++)
-            {
-                byte b=buffer[i];
-                buffer2[i]=b==0?bMax:--b;
+                for(int i = 0;i < r;i++)
+                {
+                    byte b=buffer[i];
+                    buffer2[i]=b==0?bMax:--b;
+                }
+                out.write(buffer2, 0, r);
+                k++;
             }
-            out.write(buffer2, 0, r);
-            k++;
+            out.close();
+            is.close();
+            System.out.println("è§£å¯†æˆåŠŸï¼Ÿ");
+            return tempUrl;
         }
-        out.close();
-        is.close();
-        System.out.println("½âÃÜ³É¹¦£¿");
-        return tempUrl;
-    }
 
-    /**
-     * ÅÐ¶ÏÎÄ¼þÊÇ·ñ¼ÓÃÜ
-     * @param fileName
-     * @return
-     */
-    public static String readFileLastByte(String fileName, int keyLength) {
-        File file = new File(fileName);
-        if(!file.exists())return null;
-        StringBuffer str = new StringBuffer();
-        try {
-            // ´ò¿ªÒ»¸öËæ»ú·ÃÎÊÎÄ¼þÁ÷£¬°´¶ÁÐ´·½Ê½
-            RandomAccessFile randomFile = new RandomAccessFile(fileName, "r");
-            // ÎÄ¼þ³¤¶È£¬×Ö½ÚÊý
-            long fileLength = randomFile.length();
-            //½«Ð´ÎÄ¼þÖ¸ÕëÒÆµ½ÎÄ¼þÎ²¡£
-            for(int i = keyLength ; i>=1 ; i--){
-                randomFile.seek(fileLength-i);
-                str.append((char)randomFile.read());
+        /**
+         * åˆ¤æ–­æ–‡ä»¶æ˜¯å¦åŠ å¯†
+         * @param fileName
+         * @return
+         */
+        public static String readFileLastByte(String fileName, int keyLength) {
+            File file = new File(fileName);
+            if(!file.exists())return null;
+            StringBuffer str = new StringBuffer();
+            try {
+                // æ‰“å¼€ä¸€ä¸ªéšæœºè®¿é—®æ–‡ä»¶æµï¼ŒæŒ‰è¯»å†™æ–¹å¼
+                RandomAccessFile randomFile = new RandomAccessFile(fileName, "r");
+                // æ–‡ä»¶é•¿åº¦ï¼Œå­—èŠ‚æ•°
+                long fileLength = randomFile.length();
+                //å°†å†™æ–‡ä»¶æŒ‡é’ˆç§»åˆ°æ–‡ä»¶å°¾ã€‚
+                for(int i = keyLength ; i>=1 ; i--){
+                    randomFile.seek(fileLength-i);
+                    str.append((char)randomFile.read());
+                }
+                randomFile.close();
+                return str.toString();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            randomFile.close();
-            return str.toString();
-        } catch (IOException e) {
-            e.printStackTrace();
+            return null;
         }
-        return null;
-    }
-    public static void main(String args[]) throws Exception {
-        //encrypt("e:\\005.jpg","12345");
-        //decrypt("e:\\005.jpg-encrypted","e:\\005get.jpg",5);
-    }
+        public static void main(String args[]) throws Exception {
+            //encrypt("e:\\005.jpg","12345");
+            //decrypt("e:\\005.jpg-encrypted","e:\\005get.jpg",5);
+        }
 
-}
+    }

@@ -1,9 +1,12 @@
 package Version1;
+
 import java.io.*;
 import java.net.*;
+
 /**
  * Created by 巩汝何 on 2017/7/11.
  * 栗仁武 201592169
+ * 123456789
  */
 public class FileClient {
     Socket s;
@@ -14,11 +17,12 @@ public class FileClient {
     String UserName;
     //BufferedReader br;
     FileWriter fw;
-    FileClient()throws IOException//初始化
+
+    FileClient() throws IOException//初始化
     {
-        host="";
-        port=GetHostPort();//得到主机地址和端口然后建立tcp连接
-        s=new Socket(host,port);
+        host = "";
+        port = GetHostPort();//得到主机地址和端口然后建立tcp连接
+        s = new Socket(host, port);
         dis = new DataInputStream(s.getInputStream());
         dos = new DataOutputStream(s.getOutputStream());
         //br=new BufferedReader(dis);
@@ -44,14 +48,20 @@ public class FileClient {
                         for(int k=j+1;k<length;k++)
                             UserName+=c[k];
                     }
+
                 }
             }
         }
         return Integer.parseInt(ports);
     }
+
+    public void main(String args[]) throws IOException {
+        switch (args[0]) {
+
     public void main(String args[]) throws Exception {
         switch (args[0])
         {
+
             case "upload"://在这里要调用文件上传程序
                 UpLoad(args[1]);
                 break;
@@ -63,80 +73,6 @@ public class FileClient {
                 break;
         }
     }
-    public int remove(String uuid) throws IOException {
-        //传输命令到总服务器
-        dos.writeInt(1);
-        dos.writeChars(uuid + '#');
-        dos.flush();
-        char c=dis.readChar();
-        if(c=='s')
-            System.out.println("Remove "+uuid+" succeed!");
-        else if(c=='f')
-            System.out.println("Remove "+uuid+" failed!");
-        return 0;
-    }
-    public int download(String uuid,String DestFile) throws Exception {
-        //传输下载文件的命令到总服务器
-        dos.writeInt(2);
-        dos.writeChars(uuid);
-        dos.flush();
-        String sb="";
-        String ip1="",port1="",ip2="",port2="";
-        char c;//服务器传输过来的数据格式"xxx.xxx.xxx.xxx 1234 xxx.xxx.xxx.xxx 1235q"
-        while((c=dis.readChar())!='q')
-        {
-            sb+=c;//获得主、次节点的端口和ip地址
-        }
-        int numofspace=0;//空格的数量
-        for(int i=0;i<sb.length();i++)//得到主次节点的ip和端口号
-        {
-            if(sb.charAt(i)==' ')
-                numofspace++;
-            if(numofspace==1)
-                ip1=sb.substring(0,i-1);
-            else if(numofspace==2)
-            {
-                port1=sb.substring(ip1.length(),i-1);
-            }
-            else if(numofspace==3)
-            {
-                ip2=sb.substring(ip1.length()+port1.length()+1,i-1);
-                port2=sb.substring(i+1,sb.length()-2);
-            }
-        }
-        s.close();//关闭与服务器端的连接
-        CreateLinkToNode(ip1,port1);//建立与主节点的链接
-        c=dis.readChar();
-        if(c=='y')
-        {
-            System.out.println("该节点存在该文件");
-            byte[] inputByte = null;
-            int length = 0;
-            FileOutputStream fout=new FileOutputStream(uuid);//接收的文件放到uuid里面
-            inputByte=new byte[1024];
-            System.out.println("开始接受数据");
-            while(true)
-            {
-                if(dis!=null)
-                {
-                    length = dis.read(inputByte, 0, inputByte.length);
-                }
-                if (length == -1) {
-                    break;
-                }
-                System.out.println(length);
-                fout.write(inputByte, 0, length);
-                fout.flush();
-            }
-            System.out.println("完成接受数据");
-            fout.close();
-            dis.close();
-            s.close();
-            //开始进行解码
-            FileEncryptAndDecrypt.decrypt(uuid,DestFile,5);
-        }
-        return 0;
-    }
     public int UpLoad(String filepath) throws Exception {
         File f=new File(filepath);
         String SendMessage="";
@@ -147,48 +83,30 @@ public class FileClient {
         dos.flush();//强制输出缓存当中的数据
         //adsf
         //开始
-        String sb="";
-        String ip1="",port1="",ip2="",port2="",uuid="";
+        String sb = "";
+        String ip1 = "", port1 = "", ip2 = "", port2 = "", uuid = "";
         char c;//服务器传输过来的数据格式"xxx.xxx.xxx.xxx 1234 xxx.xxx.xxx.xxx 1235 xxxxxxxq（uuid）"
-        while((c=dis.readChar())!='q')
-        {
-            sb+=c;//获得主、次节点的端口和ip地址
+        while ((c = dis.readChar()) != 'q') {
+            sb += c;//获得主、次节点的端口和ip地址
         }
-        int numofspace=0;//空格的数量
-        for(int i=0;i<sb.length();i++)//得到主次节点的ip和端口号
+        int numofspace = 0;//空格的数量
+        for (int i = 0; i < sb.length(); i++)//得到主次节点的ip和端口号
         {
-            if(sb.charAt(i)==' ')
+            if (sb.charAt(i) == ' ')
                 numofspace++;
-            if(numofspace==1)
-                ip1=sb.substring(0,i-1);
-            else if(numofspace==2)
-            {
-                port1=sb.substring(ip1.length(),i-1);
-            }
-            else if(numofspace==3)
-            {
-                ip2=sb.substring(ip1.length()+port1.length()+1,i-1);
-            }
-            else if(numofspace==4)
-            {
-                port2=sb.substring(ip1.length()+port1.length()+ip2.length()+2,i-1);
-                uuid=sb.substring(i+1,sb.length()-2);
+            if (numofspace == 1)
+                ip1 = sb.substring(0, i - 1);
+            else if (numofspace == 2) {
+                port1 = sb.substring(ip1.length(), i - 1);
+            } else if (numofspace == 3) {
+                ip2 = sb.substring(ip1.length() + port1.length() + 1, i - 1);
+            } else if (numofspace == 4) {
+                port2 = sb.substring(ip1.length() + port1.length() + ip2.length() + 2, i - 1);
+                uuid = sb.substring(i + 1, sb.length() - 2);
             }
         }
         s.close();//关闭与服务器端的连接
-        CreateLinkToNode(ip1,port1);//建立与主节点的链接
-
-        //进行文件加密
-        FileEncryptAndDecrypt.encrypt(filepath,"12345",uuid);//新建了一个加密过后的文件
-        String path = f.getPath();
-        int index = path.lastIndexOf("\\");
-        String destFile = path.substring(0, index)+"\\"+uuid;//目标文件生成
-        File fsend =new File(destFile);
-        if(f!=null)//如果文件存在
-        {
-            int length;
-            FileInputStream fin=new FileInputStream(fsend);//传输文件
-            byte[] sendByte=new byte[1024];
+        CreateLinkToNode(ip1, port1);//建立与主节点的链接
             dos.writeUTF(uuid);//传输文件名过去？
             while((length = fin.read(sendByte, 0, sendByte.length))>0){
                 dos.write(sendByte,0,length);
@@ -206,12 +124,6 @@ public class FileClient {
         }
         return 0;
     }
-    public void CreateLinkToNode(String ip,String ports) throws IOException {
-        InetAddress address=Inet4Address.getByName(ip) ;
-        s = new Socket(address,Integer.parseInt(ports));
-        dos=new DataOutputStream(s.getOutputStream());
-        dis=new DataInputStream(s.getInputStream());
-
-        //s=new Socket()t
+        //s=new Socket()
     }
 }
