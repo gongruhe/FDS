@@ -1,10 +1,6 @@
 package Version1;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
 
 /**
  * Below project FDS
@@ -13,50 +9,32 @@ import java.net.Socket;
 public class ServeClientThread extends Thread {
 
     private ServerSocket serverSocket = null;
-    private Socket client = null;
+    private IOStrategy ios = null;
 
-    public ServeClientThread(ServerSocket serverSocket) {
+    public ServeClientThread(ServerSocket serverSocket, IOStrategy ios) {
         this.serverSocket = serverSocket;
+        this.ios = ios;
+    }
+
+    public boolean isIdle() {
+        return serverSocket == null;
+    }
+
+    public synchronized void setServerSocket(ServerSocket serverSocket) {
+        this.serverSocket = serverSocket;
+        notifyAll();
     }
 
     @Override
-    public void run() {
-        try {
-            while (serverSocket != null) {
-                client = serverSocket.accept();
+    public synchronized void run() {
+        while (true) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            DataInputStream dis = new DataInputStream(client.getInputStream());
-            DataOutputStream dos = new DataOutputStream(client.getOutputStream());
-            int command = dis.readInt();
-            switch (command) {
-                case 0:
-                    String message = new String();
-                    char c;
-                    while ((c = dis.readChar()) != '#') {
-                        message += c;
-                    }
-                    String[] temp = message.split(",");
-                    FileServer.getUserNames().add(temp[0]);
-                    String fileName = temp[1];
-                    String fileLength = temp[2];
-                    FileInfo info = new FileInfo(fileName, Long.parseLong(fileLength));
-                    FileServer.FileNum num = new FileServer.FileNum();
-                    FileServer.getFileSet().put(num, info);
-                    StorageNode node[] = FileServer.findFreeNode(Long.parseLong(fileLength));
-                    dos.writeChars(node[0].getInfo().getIp() + " " + node[0].getInfo().getPort() + " "
-                            + node[1].getInfo().getIp() + " " + node[1].getInfo().getPort() + " " + num);
-                    break;
-                case 1:
-
-                    break;
-                case 2:
-
-                    break;
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
+            ios.service(serverSocket);
+            serverSocket = null;
         }
-
     }
 }

@@ -1,9 +1,6 @@
 package Version1;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.Socket;
+import java.net.DatagramSocket;
 
 /**
  * Below project FDS
@@ -11,27 +8,21 @@ import java.net.Socket;
  */
 public class ServeNodesThread extends Thread {
 
-    private Socket storageNode = null;
+    private DatagramSocket serverSocket =null;
+    private IOStrategy ios = null;
 
-    public ServeNodesThread(Socket storageNode) {
-        this.storageNode = storageNode;
+
+    public ServeNodesThread(DatagramSocket storageNode, IOStrategy ios) {
+        this.serverSocket = storageNode;
+        this.ios = ios;
     }
 
+    public boolean isIdle() {
+        return serverSocket == null;
+    }
 
     @Override
     public void run() {
-        try {
-            DataInputStream dis = new DataInputStream(storageNode.getInputStream());
-            DataOutputStream dos = new DataOutputStream(storageNode.getOutputStream());
-            while (true) {
-                String fileUUID = new String();
-                char c;
-                while ((c = dis.readChar()) != -1) {
-                    fileUUID += c;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
     }
 }

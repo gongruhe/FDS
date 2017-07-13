@@ -7,5 +7,6 @@ import java.net.ServerSocket;
  * Created by Lee_rw on 2017/7/13.
  */
 public interface IOStrategy {
-    public void service(ServerSocket socket);
+    public void service(ServerSocket serverSocket);
+
 }
