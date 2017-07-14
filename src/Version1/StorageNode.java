@@ -22,21 +22,12 @@ public class StorageNode {
         }
     }*/
     StorageNode() throws IOException {
-        server=new ServerSocket(info.getPort());
+
+        new Thread(new SNodeServerThread(info.getPort(),info)
+        ).start();
+
     }
-    public void NodeStart() throws IOException {
-        Socket socket =server.accept();
-        invoke(socket);
-    }
-    public void invoke(final Socket client)
-    {
-        new  Thread(new Runnable() {
-            @Override
-            public void run() {//在这里写run函数
-                //do things
-            }
-        }).start();
-    }
+
     public NodeInfo getInfo() {
         return info;
     }
