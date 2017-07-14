@@ -1,4 +1,5 @@
 package Version1;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -20,62 +21,64 @@ import java.util.*;
  * 保存这些序列化信息到文件中。
  */
 public class FileServer {
-    public  static Set<StorageNode> nodes = new HashSet<>();    //存储FileStorage服务器结点
-    private static int FileServerPort = 6545;       //服务器的端口
-    private ServerSocket serverSocket;
-    private static Map<NodeInfo, StorageNode> nodeInfo = new HashMap<NodeInfo, StorageNode>();  //存储FileStorage服务器结点的信息
-    private static Map<FileNum, FileInfo> fileSet = new HashMap<FileNum, FileInfo>();
-    private static List<String> userNames = new ArrayList<String>();
 
-    public FileServer(ServerSocket serverSocket) {
-        this.serverSocket = serverSocket;
+    public static List<StorageNode> nodes = new ArrayList<>();    //存储FileStorage服务器结点
+    private static int clientPort = 6000;       //服务器接收客户端的端口
+    private static int storageNodePort = 6001;
+    private ServerSocket serveClientSocket;
+    private ServerSocket serveNodeSocket;
+    private static Map<NodeInfo, StorageNode> nodeInfo = new HashMap<>();  //存储FileStorage服务器结点的信息
+    private static Map<FileNum, FileInfo> fileSet = new HashMap<>();
+    private static List<String> userNames = new ArrayList<>();
+
+    public FileServer(ServerSocket serverSocket, ServerSocket serveNodeSocket) {
+        this.serveClientSocket = serverSocket;
+        this.serveNodeSocket = serveNodeSocket;
     }
 
-    public static void main() throws IOException {
-        ServerSocket ss  = new ServerSocket(FileServerPort);
-        FileServer fs = new FileServer(ss);
+    public static void main(String[] args) throws IOException {
+        FileServer fs = new FileServer(new ServerSocket(clientPort), new ServerSocket(storageNodePort));
         System.out.println("Server is ready to provide service");
-        Socket s = ss.accept();
-        DataInputStream dis = new DataInputStream(s.getInputStream());
-        DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-        while (true) {
-            int command = dis.readInt();
-            switch (command) {
-                case 0:
-                    //上传文件
-                    String message = new String();
-                    char c;
-                    while ((c = dis.readChar()) != '#') {
-                        message += c;
-                    }
-                    String[] temp = message.split(",");
-                    userNames.add(temp[0]);
-                    String fileName = temp[1];
-                    String fileLength = temp[2];
-                    FileNum num = new FileNum();
-                    FileInfo info = new FileInfo(fileName, Long.parseLong(fileLength));
-                    fileSet.put(num, info);
-                    break;
-                case 1:
-                    //下载文件
 
-                    break;
+
+
+    }
+
+
+    /**
+     * @param fileLength 需要上传的文件大小
+     * @return null    没有找到
+     * freeNode    第一个满足大小的结点
+     */
+    public static StorageNode[] findFreeNode(long fileLength) {
+        StorageNode[] freeNode = null;
+        Collections.sort(nodes, new Comparator<StorageNode>() {
+            @Override
+            public int compare(StorageNode o1, StorageNode o2) {
+                if (o1.getInfo().getRemainCapacity() > o2.getInfo().getRemainCapacity()) {
+                    return 1;
+                }
+                if (o1.getInfo().getRemainCapacity() < o2.getInfo().getRemainCapacity()) {
+                    return -1;
+                }
+                return 0;
+            }
+        });
+        for (StorageNode node :
+                nodes) {
+            if (node.getInfo().getRemainCapacity() > fileLength) {
+                freeNode[0] = node;
+                break;
             }
         }
+        freeNode[1] = nodes.get(nodes.size() - 1);
+        return freeNode;
     }
 
-    private StorageNode findFreeNode() {
-        StorageNode freeNode;
-        Iterator<StorageNode> iterator = nodes.iterator();
-        while (iterator.hasNext()) {
-            if ()
-        }
-    }
-
-
-    private static class FileNum { //文件编号
+    public static class FileNum { //文件编号
         private UUID fileNum;
-        public FileNum (UUID fileNum) {
+
+        public FileNum(UUID fileNum) {
             this.fileNum = fileNum;
         }
 
@@ -90,8 +93,9 @@ public class FileServer {
         public void setFileNum(UUID fileNum) {
             this.fileNum = fileNum;
         }
+
         public void generateNum() {
-           setFileNum(UUID.randomUUID());
+            setFileNum(UUID.randomUUID());
         }
 
         @Override
@@ -114,4 +118,50 @@ public class FileServer {
             return fileNum != null ? fileNum.hashCode() : 0;
         }
     }
+
+
+    public static List<StorageNode> getNodes() {
+        return nodes;
+    }
+
+    public static void setNodes(List<StorageNode> nodes) {
+        FileServer.nodes = nodes;
+    }
+
+    public static Map<NodeInfo, StorageNode> getNodeInfo() {
+        return nodeInfo;
+    }
+
+    public static void setNodeInfo(Map<NodeInfo, StorageNode> nodeInfo) {
+        FileServer.nodeInfo = nodeInfo;
+    }
+
+    public static Map<FileNum, FileInfo> getFileSet() {
+        return fileSet;
+    }
+
+    public static void setFileSet(Map<FileNum, FileInfo> fileSet) {
+        FileServer.fileSet = fileSet;
+    }
+
+    public static List<String> getUserNames() {
+        return userNames;
+    }
+
+    public static void setUserNames(List<String> userNames) {
+        FileServer.userNames = userNames;
+    }
+
+    public ServerSocket getServeNodeSocket() {
+        return serveNodeSocket;
+    }
+
+    public void setServeNodeSocket(ServerSocket serveNodeSocket) {
+        this.serveNodeSocket = serveNodeSocket;
+    }
+
+    public ServerSocket getServeClientSocket() {
+        return serveClientSocket;
+    }
+
 }
