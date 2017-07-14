@@ -115,7 +115,7 @@ public class FileClient {
         dos.flush();
 
         c=dis.readChar();
-        if(c=='y')
+        if(c=='s')
         {
             System.out.println("该节点存在该文件");
             byte[] inputByte = null;
@@ -142,6 +142,44 @@ public class FileClient {
             s.close();
             //开始进行解码
             FileEncryptAndDecrypt.decrypt(uuid,DestFile,5);
+        }
+        else
+        {
+            System.out.println("主节点，下载失败，连接备份节点");
+            CreateLinkToNode(ip2,port2);
+            dos.writeInt(2);
+            dos.writeChars(ip2+" "+port2+" "+UserName+" "+uuid+"q");
+            dos.flush();
+            if(c=='s')
+            {
+                System.out.println("该节点存在该文件");
+                byte[] inputByte = null;
+                int length = 0;
+                FileOutputStream fout=new FileOutputStream(uuid);//接收的文件放到uuid里面
+                inputByte=new byte[1024];
+                System.out.println("开始接受数据");
+                while(true)
+                {
+                    if(dis!=null)
+                    {
+                        length = dis.read(inputByte, 0, inputByte.length);
+                    }
+                    if (length == -1) {
+                        break;
+                    }
+                    System.out.println(length);
+                    fout.write(inputByte, 0, length);
+                    fout.flush();
+                }
+                System.out.println("完成接受数据");
+                fout.close();
+                dis.close();
+                s.close();
+                //开始进行解码
+                FileEncryptAndDecrypt.decrypt(uuid,DestFile,5);
+            }
+            else
+                System.out.println("不存在此文件！下载失败！");
         }
         return 0;
     }

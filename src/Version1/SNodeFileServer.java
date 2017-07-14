@@ -42,9 +42,61 @@ public class SNodeFileServer implements Runnable{
         }
     }
     //作为备份节点接收文件
-    public void BFileAccept()
-    {
+    public void BFileAccept() throws IOException {
+        //读取从主节点发过来的信息
+        char c;
+        String Msg="";
+        String uuid="";
+        String Username="";
+        byte[]inputByte=new byte[1024];
+        int length=0;
+        long filelength=0;
+        while((c=dis.readChar())!='q')//格式为"Username uuidq"
+        {
+            Msg+=c;
+        }
+        for(int i=0;i<Msg.length();i++)
+        {
+            if(Msg.charAt(i)==' ')
+            {
+               Username=Msg.substring(0,i-1);
+               uuid=Msg.substring(i+1,i-2);
+            }
+        }
+        filelength=dis.readLong();
+        //判断容量是否足够存储
+        if(nodeInfo.getRemainCapacity()>filelength)
+        {
+            dos.writeChar('o');
+            dos.flush();
+            if(dis.readChar()=='s')//开始传送文件
+            { //执行文件接收程序
+                File F=new File("e:\\"+Username+"\\"+"uuid.storage");
+                FileOutputStream fos=new FileOutputStream(F);
 
+                while(true)
+                {
+                    if(dis!=null)
+                    {
+                        length = dis.read(inputByte,0,inputByte.length);
+                    }
+                    if(length==-1)
+                        break;
+                    fos.write(inputByte,0,length);
+                    fos.flush();
+                }
+                System.out.println("备份节点完成接收");
+                fos.close();
+                dis.close();
+                socket.close();
+                dos.close();
+            }
+        }
+        else
+        {
+            dos.writeChar('n');
+            System.out.println("节点容量不足");
+        }
     }
     //这个函数是作为主节点来接收文件的程序
     public void FileAccept() throws IOException {
@@ -55,6 +107,8 @@ public class SNodeFileServer implements Runnable{
         String BFport="";
         String uuid="";
         String Username="";
+        byte[]inputByte=new byte[1024];
+        int length=0;
         long filelength=0;
         while((c=dis.readChar())!='q')//格式为"xxx.xxx.xxx 1234 Username uuidq"
         {
@@ -89,10 +143,9 @@ public class SNodeFileServer implements Runnable{
             dos.flush();
             if(dis.readChar()=='s')//开始传送文件
             { //执行文件接收程序
-                File F=new File("e:\\"+Username+"\\"+"uuid.storage");
+                File F=new File("e:\\"+Username+"\\"+uuid);
                 FileOutputStream fos=new FileOutputStream(F);
-                byte[]inputByte=new byte[1024];
-                int length=0;
+
                 while(true)
                 {
                     if(dis!=null)
@@ -109,9 +162,32 @@ public class SNodeFileServer implements Runnable{
                 dis.close();
                 socket.close();
                 dos.close();
+
                 LinkToBFNode(BFip,BFport);//接下来向备份节点传输文件请求
+
                 dos.writeInt(1);
-                dos.writeChars("");
+                dos.writeChars(Username+" "+uuid+"q");
+                dos.flush();
+                if(dis.readChar()=='o')
+                {
+                    dos.writeChar('s');
+                    dos.flush();
+                    File F2=new File("e:\\"+Username+"\\"+uuid);
+                    FileInputStream fis=new FileInputStream(F2);
+                    while((length=fis.read(inputByte,0,inputByte.length))>0)
+                    {
+                        dos.write(inputByte,0,length);
+                        dos.flush();
+                    }
+                    System.out.println("备份完成");
+                    dis.close();
+                    dos.close();
+                    socket.close();
+                }
+                else
+                {
+                    System.out.println("备份失败！");
+                }
 
             }
         }
@@ -127,9 +203,72 @@ public class SNodeFileServer implements Runnable{
         dos=new DataOutputStream(socket.getOutputStream());
         dis=new DataInputStream(socket.getInputStream());
     }
-    public void FileSend()
-    {
+    public void FileSend() throws IOException {
+        //读取从客户端发过来的信息
+        char c;
+        String Msg="";
+        String BFip="";
+        String BFport="";
+        String uuid="";
+        String Username="";
+        byte[]inputByte=new byte[1024];
+        int length=0;
+        //long filelength=0;
+        while((c=dis.readChar())!='q')//格式为"xxx.xxx.xxx 1234 Username uuidq"
+        {
+            Msg+=c;
+        }
+        int numofSpace=0;
+        for(int i=0;i<Msg.length();i++)
+        {
+            if(Msg.charAt(i)==' ')
+            {
+                numofSpace++;
+                if(numofSpace==1)
+                {
+                    BFip=Msg.substring(0,i-1);
+                }
+                else if(numofSpace==2)
+                {
+                    BFport=Msg.substring(BFip.length()+1,i-1);
+                }
+                else if(numofSpace==3)
+                {
+                    Username=Msg.substring(BFip.length()+BFport.length()+1,i-1);
+                    uuid=Msg.substring(BFip.length()+BFport.length()+Username.length()+1,i-2);
+                }
+            }
+        }
 
+        if(nodeInfo.hasFile(Username,uuid))//主节点中存在这个文件
+        {
+            dos.writeChar('s');//直接发送s然后开始传输文件
+            dos.flush();
+            if(true)//开始传送文件dis.readChar()=='s'
+            { //执行文件发送程序
+                File F2=new File("e:\\"+Username+"\\"+uuid);
+                FileInputStream fis=new FileInputStream(F2);
+                while((length=fis.read(inputByte,0,inputByte.length))>0)
+                {
+                    dos.write(inputByte,0,length);
+                    dos.flush();
+                }
+                System.out.println("文件传输成功");
+                dis.close();
+                socket.close();
+                dos.close();
+            }
+        }
+        else//主节点中不存在这个文件，向备份节点发送信息申请传过来
+        {
+            System.out.println("主节点中不存在这个文件需要从备份节点传输");
+            dos.writeChar('n');
+            dos.flush();
+            dos.flush();
+            dos.close();
+            dis.close();
+            socket.close();
+        }
     }
 
 

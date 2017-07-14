@@ -90,6 +90,10 @@ public class NodeInfo implements Comparable<NodeInfo> {
     public void setCanUse(boolean canUse) {
         this.canUse = canUse;
     }
+    public boolean hasFile(String Username,String uuid)
+    {
+        return true;
+    }
 
     @Override
     public boolean equals(Object o) {
