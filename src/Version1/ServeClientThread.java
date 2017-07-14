@@ -9,9 +9,9 @@ import java.net.ServerSocket;
 public class ServeClientThread extends Thread {
 
     private ServerSocket serverSocket = null;
-    private IOStrategy ios = null;
+    private ClientStrategy ios = null;
 
-    public ServeClientThread(ServerSocket serverSocket, IOStrategy ios) {
+    public ServeClientThread(ServerSocket serverSocket, ClientStrategy ios) {
         this.serverSocket = serverSocket;
         this.ios = ios;
     }

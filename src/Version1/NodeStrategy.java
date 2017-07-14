@@ -1,15 +1,14 @@
 package Version1;
 
-import java.net.ServerSocket;
+import java.net.DatagramSocket;
 
 /**
  * Below project FDS
  * Created by Lee_rw on 2017/7/13.
  */
-public class NodeStrategy implements IOStrategy {
+public class NodeStrategy {
 
-    @Override
-    public void service(ServerSocket serverSocket) {
+    public void service(DatagramSocket serverSocket) {
 
     }
 }

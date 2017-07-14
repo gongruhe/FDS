@@ -9,11 +9,10 @@ import java.net.Socket;
  * Below project FDS
  * Created by Lee_rw on 2017/7/13.
  */
-public class ClientStrategy implements IOStrategy {
+public class ClientStrategy {
 
     private Socket client = null;
 
-    @Override
     public void service(ServerSocket serverSocket) {
         try {
             while (serverSocket != null) {

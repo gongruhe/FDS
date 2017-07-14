@@ -9,10 +9,10 @@ import java.net.DatagramSocket;
 public class ServeNodesThread extends Thread {
 
     private DatagramSocket serverSocket =null;
-    private IOStrategy ios = null;
+    private NodeStrategy ios = null;
 
 
-    public ServeNodesThread(DatagramSocket storageNode, IOStrategy ios) {
+    public ServeNodesThread(DatagramSocket storageNode, NodeStrategy ios) {
         this.serverSocket = storageNode;
         this.ios = ios;
     }
