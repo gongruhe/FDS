@@ -65,7 +65,7 @@ public class FileClient {
         }
     }
     public int remove(String uuid) throws IOException {
-        //传输命令到总服务器
+        //传输命令到总服务器,移除文件命令依靠服务器向节点传递信息（此时服务器需要，通过UDP协议来实现）
         dos.writeInt(1);
         dos.writeChars(uuid);
         dos.flush();
@@ -76,7 +76,7 @@ public class FileClient {
             System.out.println("Remove "+uuid+" failed!");
         return 0;
     }
-    public int download(String uuid,String DestFile) throws IOException {
+    public int download(String uuid,String DestFile) throws Exception {
         //传输下载文件的命令到总服务器
         dos.writeInt(2);
         dos.writeChars(uuid);
@@ -107,14 +107,39 @@ public class FileClient {
         }
         s.close();//关闭与服务器端的连接
         CreateLinkToNode(ip1,port1);//建立与主节点的链接
+        //向主节点发送命令以及消息
+        dos.writeInt(2);
+        dos.writeChars(ip2+" "+port2+" "+UserName+" "+uuid+"q");
+        dos.flush();
+
         c=dis.readChar();
         if(c=='y')
         {
             System.out.println("该节点存在该文件");
             byte[] inputByte = null;
             int length = 0;
-            FileOutputStream fout=new FileOutputStream(DestFile);
-
+            FileOutputStream fout=new FileOutputStream(uuid);//接收的文件放到uuid里面
+            inputByte=new byte[1024];
+            System.out.println("开始接受数据");
+            while(true)
+            {
+                if(dis!=null)
+                {
+                    length = dis.read(inputByte, 0, inputByte.length);
+                }
+                if (length == -1) {
+                    break;
+                }
+                System.out.println(length);
+                fout.write(inputByte, 0, length);
+                fout.flush();
+            }
+            System.out.println("完成接受数据");
+            fout.close();
+            dis.close();
+            s.close();
+            //开始进行解码
+            FileEncryptAndDecrypt.decrypt(uuid,DestFile,5);
         }
         return 0;
     }
@@ -136,7 +161,7 @@ public class FileClient {
             sb+=c;//获得主、次节点的端口和ip地址
         }
         int numofspace=0;//空格的数量
-        for(int i=0;i<sb.length();i++)//得到主次节点的ip和端口号
+        for(int i=0;i<sb.length();i++)//得到主次节点的ip和端口号和uuid
         {
             if(sb.charAt(i)==' ')
                 numofspace++;
@@ -158,7 +183,10 @@ public class FileClient {
         }
         s.close();//关闭与服务器端的连接
         CreateLinkToNode(ip1,port1);//建立与主节点的链接
-
+        //建立完与主节点的连接之后要向主节点发送命令以及备份节点的ip,端口号,uuid
+        dos.writeInt(0);
+        dos.writeChars(ip2+" "+port2+" "+UserName+" "+uuid+"q");
+        dos.flush();
         //进行文件加密
         FileEncryptAndDecrypt.encrypt(filepath,"12345",uuid);//新建了一个加密过后的文件
         String path = f.getPath();
