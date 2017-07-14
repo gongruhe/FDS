@@ -10,11 +10,12 @@ import java.net.Socket;
  */
 public class SNodeServerThread implements Runnable{
     //Socket socket=null;//这个东西需要吗？？？好像不需要……？
-
+    NodeInfo nodeInfo;
     int port;//端口和socket
-    public SNodeServerThread(int port)
+    public SNodeServerThread(int port,NodeInfo ni)
     {
         this.port=port;
+        nodeInfo=ni;
         //this.socket=socket;
     }
     public void run()//在这里实现对文件的接收，传输，以及储存
@@ -26,7 +27,7 @@ public class SNodeServerThread implements Runnable{
             while(true)//开始循环侦听
             {
                 socket=serverSocket.accept();
-                Thread thread=new Thread(new SNodeFileServer(socket));
+                Thread thread=new Thread(new SNodeFileServer(socket,nodeInfo));
                 thread.start();//线程启动
                 System.out.println("文件服务线程启动");
                 //以下是输出客户端的ip

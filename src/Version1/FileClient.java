@@ -80,6 +80,7 @@ public class FileClient {
         //传输下载文件的命令到总服务器
         dos.writeInt(2);
         dos.writeChars(uuid);
+
         dos.flush();
         String sb="";
         String ip1="",port1="",ip2="",port2="";
@@ -92,17 +93,18 @@ public class FileClient {
         for(int i=0;i<sb.length();i++)//得到主次节点的ip和端口号
         {
             if(sb.charAt(i)==' ')
-                numofspace++;
-            if(numofspace==1)
+            {   numofspace++;
+                if(numofspace==1)
                 ip1=sb.substring(0,i-1);
-            else if(numofspace==2)
-            {
+                 else if(numofspace==2)
+                 {
                 port1=sb.substring(ip1.length(),i-1);
-            }
-            else if(numofspace==3)
-            {
+                  }
+                else if(numofspace==3)
+                {
                 ip2=sb.substring(ip1.length()+port1.length()+1,i-1);
                 port2=sb.substring(i+1,sb.length()-2);
+                 }
             }
         }
         s.close();//关闭与服务器端的连接
@@ -164,21 +166,22 @@ public class FileClient {
         for(int i=0;i<sb.length();i++)//得到主次节点的ip和端口号和uuid
         {
             if(sb.charAt(i)==' ')
-                numofspace++;
-            if(numofspace==1)
+            {     numofspace++;
+                if(numofspace==1)
                 ip1=sb.substring(0,i-1);
-            else if(numofspace==2)
-            {
+                else if(numofspace==2)
+                {
                 port1=sb.substring(ip1.length(),i-1);
-            }
-            else if(numofspace==3)
-            {
+                }
+                else if(numofspace==3)
+                {
                 ip2=sb.substring(ip1.length()+port1.length()+1,i-1);
-            }
-            else if(numofspace==4)
-            {
+                }
+                else if(numofspace==4)
+                {
                 port2=sb.substring(ip1.length()+port1.length()+ip2.length()+2,i-1);
                 uuid=sb.substring(i+1,sb.length()-2);
+                }
             }
         }
         s.close();//关闭与服务器端的连接
@@ -186,33 +189,39 @@ public class FileClient {
         //建立完与主节点的连接之后要向主节点发送命令以及备份节点的ip,端口号,uuid
         dos.writeInt(0);
         dos.writeChars(ip2+" "+port2+" "+UserName+" "+uuid+"q");
+        dos.writeLong(f.length());//传文件大小过去
         dos.flush();
-        //进行文件加密
-        FileEncryptAndDecrypt.encrypt(filepath,"12345",uuid);//新建了一个加密过后的文件
-        String path = f.getPath();
-        int index = path.lastIndexOf("\\");
-        String destFile = path.substring(0, index)+"\\"+uuid;//目标文件生成
-        File fsend =new File(destFile);
-        if(f!=null)//如果文件存在
-        {
-            int length;
-            FileInputStream fin=new FileInputStream(fsend);//传输文件
-            byte[] sendByte=new byte[1024];
-            dos.writeUTF(uuid);//传输文件名过去？
-            while((length = fin.read(sendByte, 0, sendByte.length))>0){
-                dos.write(sendByte,0,length);
-                dos.flush();
+        if(dis.readChar()=='o')//可以传文件过去
+        {//进行文件加密
+            dos.writeChar('s');//开始传输文件
+            dos.flush();
+            FileEncryptAndDecrypt.encrypt(filepath,"12345",uuid);//新建了一个加密过后的文件
+            String path = f.getPath();
+            int index = path.lastIndexOf("\\");
+            String destFile = path.substring(0, index)+"\\"+uuid;//目标文件生成
+            File fsend =new File(destFile);
+            if(f!=null)//如果文件存在
+            {
+                int length;
+                FileInputStream fin=new FileInputStream(fsend);//传输文件
+                byte[] sendByte=new byte[1024];
+                dos.writeUTF(uuid);//传输文件名过去？
+                while((length = fin.read(sendByte, 0, sendByte.length))>0){
+                    dos.write(sendByte,0,length);
+                    dos.flush();
+                }
+                //然后关闭文件流和socket
+                fin.close();
+                dos.close();
+                s.close();
+                fsend.delete();//删除加密后的文件
+                FileWriter fw=new FileWriter("HasUpload.txt");
+                fw.write("已经上传成功的文件："+filepath+" uuid:"+uuid+System.lineSeparator());
+                fw.close();
             }
-            //然后关闭文件流和socket
-            fin.close();
-            dos.close();
-            s.close();
-            fsend.delete();//删除 加密后的文件
-            FileWriter fw=new FileWriter("HasUpload.txt");
-            fw.write("已经上传成功的文件："+filepath+" uuid:"+uuid+System.lineSeparator());
-            fw.close();
-
         }
+        else
+            System.out.println("传输失败");
         return 0;
     }
     public void CreateLinkToNode(String ip,String ports) throws IOException {
