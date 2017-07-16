@@ -67,7 +67,8 @@ public class FileClient {
     public int remove(String uuid) throws IOException {
         //传输命令到总服务器,移除文件命令依靠服务器向节点传递信息（此时服务器需要，通过UDP协议来实现）
         dos.writeInt(1);
-        dos.writeChars(uuid);
+        dos.writeChars(UserName+","+uuid+"#");
+
         dos.flush();
         char c=dis.readChar();
         if(c=='s')
@@ -79,8 +80,7 @@ public class FileClient {
     public int download(String uuid,String DestFile) throws Exception {
         //传输下载文件的命令到总服务器
         dos.writeInt(2);
-        dos.writeChars(uuid);
-
+        dos.writeChars(UserName+","+uuid+"#");
         dos.flush();
         String sb="";
         String ip1="",port1="",ip2="",port2="";
