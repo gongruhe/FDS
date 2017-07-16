@@ -2,10 +2,7 @@ package Version1;
 
 import javax.xml.soap.Node;
 import java.io.*;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.*;
 
 /**
  * Created by 巩汝何 on 2017/7/14.
@@ -16,11 +13,15 @@ public class SNodeFileServer implements Runnable{
     DataInputStream dis;
     DataOutputStream dos;
     NodeInfo nodeInfo;
-    SNodeFileServer(Socket socket,NodeInfo ni) throws IOException {
+    Inet4Address Sip;
+    int Sport;
+    SNodeFileServer(Socket socket,NodeInfo ni,Inet4Address serverip,int serverport) throws IOException {
         this.socket=socket;//建立连接以及 获得数据输出入输出流
         dis=new DataInputStream(socket.getInputStream());
         dos=new DataOutputStream(socket.getOutputStream());
         nodeInfo=ni;
+        Sport=serverport;
+        Sip=serverip;
     }
     public void run()
     {
@@ -59,8 +60,8 @@ public class SNodeFileServer implements Runnable{
         {
             if(Msg.charAt(i)==' ')
             {
-               Username=Msg.substring(0,i-1);
-               uuid=Msg.substring(i+1,i-2);
+               Username=Msg.substring(0,i);
+               uuid=Msg.substring(i+1,i-1);
             }
         }
         filelength=dis.readLong();
@@ -86,6 +87,7 @@ public class SNodeFileServer implements Runnable{
                     fos.flush();
                 }
                 System.out.println("备份节点完成接收");
+                Confirm("Copy Succeed2");
                 fos.close();
                 dis.close();
                 socket.close();
@@ -122,16 +124,16 @@ public class SNodeFileServer implements Runnable{
                 numofSpace++;
                 if(numofSpace==1)
                 {
-                    BFip=Msg.substring(0,i-1);
+                    BFip=Msg.substring(0,i);
                 }
                 else if(numofSpace==2)
                 {
-                    BFport=Msg.substring(BFip.length()+1,i-1);
+                    BFport=Msg.substring(BFip.length()+1,i);
                 }
                 else if(numofSpace==3)
                 {
-                    Username=Msg.substring(BFip.length()+BFport.length()+1,i-1);
-                    uuid=Msg.substring(BFip.length()+BFport.length()+Username.length()+1,i-2);
+                    Username=Msg.substring(BFip.length()+BFport.length()+1,i);
+                    uuid=Msg.substring(BFip.length()+BFport.length()+Username.length()+1,i-1);
                 }
             }
         }
@@ -158,6 +160,7 @@ public class SNodeFileServer implements Runnable{
                     fos.flush();
                  }
                 System.out.println("完成接收");
+                Confirm("Receive Succeed");//像服务器发送消息确认
                 fos.close();
                 dis.close();
                 socket.close();
@@ -180,6 +183,7 @@ public class SNodeFileServer implements Runnable{
                         dos.flush();
                     }
                     System.out.println("备份完成");
+                    Confirm("Copy Succeed");
                     dis.close();
                     dos.close();
                     socket.close();
@@ -226,16 +230,16 @@ public class SNodeFileServer implements Runnable{
                 numofSpace++;
                 if(numofSpace==1)
                 {
-                    BFip=Msg.substring(0,i-1);
+                    BFip=Msg.substring(0,i);
                 }
                 else if(numofSpace==2)
                 {
-                    BFport=Msg.substring(BFip.length()+1,i-1);
+                    BFport=Msg.substring(BFip.length()+1,i);
                 }
                 else if(numofSpace==3)
                 {
-                    Username=Msg.substring(BFip.length()+BFport.length()+1,i-1);
-                    uuid=Msg.substring(BFip.length()+BFport.length()+Username.length()+1,i-2);
+                    Username=Msg.substring(BFip.length()+BFport.length()+1,i);
+                    uuid=Msg.substring(BFip.length()+BFport.length()+Username.length()+1,i-1);
                 }
             }
         }
@@ -254,7 +258,7 @@ public class SNodeFileServer implements Runnable{
                     dos.flush();
                 }
                 System.out.println("文件传输成功");
-                dis.close();
+                Confirm("DownLoad succeed");
                 socket.close();
                 dos.close();
             }
@@ -270,6 +274,10 @@ public class SNodeFileServer implements Runnable{
             socket.close();
         }
     }
-
+    public void Confirm(String message) throws IOException {
+        DatagramPacket DPacket=new DatagramPacket(message.getBytes(),message.length(),Sip,Sport);
+        DatagramSocket Dsocket = new DatagramSocket(8000);
+        Dsocket.send(DPacket);
+    }
 
 }
