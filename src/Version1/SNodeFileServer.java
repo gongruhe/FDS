@@ -92,6 +92,12 @@ public class SNodeFileServer implements Runnable{
                 dis.close();
                 socket.close();
                 dos.close();
+                if(F.exists())
+                {
+                    nodeInfo.setRemainCapacity(nodeInfo.getRemainCapacity()-F.length());
+                    // String message=String.valueOf();
+                    Confirm(nodeInfo.toString());
+                }
             }
         }
         else
@@ -160,12 +166,21 @@ public class SNodeFileServer implements Runnable{
                     fos.flush();
                  }
                 System.out.println("完成接收");
-                Confirm("Receive Succeed");//像服务器发送消息确认
+                //Confirm("Receive Succeed");//像服务器发送消息确认
+
+               /// Confirm(nodeInfo.toString());
+
                 fos.close();
                 dis.close();
                 socket.close();
                 dos.close();
+                if(F.exists())
+                {
+                    nodeInfo.setRemainCapacity(nodeInfo.getRemainCapacity()-F.length());
+                    // String message=String.valueOf();
 
+                    Confirm(nodeInfo.toString());
+                }
                 LinkToBFNode(BFip,BFport);//接下来向备份节点传输文件请求
 
                 dos.writeInt(1);
@@ -187,6 +202,7 @@ public class SNodeFileServer implements Runnable{
                     dis.close();
                     dos.close();
                     socket.close();
+
                 }
                 else
                 {

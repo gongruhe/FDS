@@ -25,14 +25,18 @@ public class SNodeUDPServerT implements Runnable{
         while(true )
         {
             try {
+                String Command;
+                String Username;
+                String uuid;
                 socket.receive(packet);
                 String message=new String (packet.getData(),0,packet.getLength());
+                Command=""+message.charAt(0);
+                message=message.substring(1,message.length());//去掉第一个；
+                FileInfo tempInfo = new FileInfo(message);
                 //处理服务器发来的消息
-                //消息格式："r Username uuid"
-                String []temp=message.split(" ");
-                String Command=temp[0];
-                String Username=temp[1];
-                String uuid=temp[2];
+                //消息格式："r (FileInfo)Username uuid"
+                Username = tempInfo.getUsername();
+                uuid = tempInfo.getUuid();
                 File fu=new File("e:"+ File.separator+Username+File.separator+uuid);
                 //有没有必要检验是否存在
                 if(fu.exists())

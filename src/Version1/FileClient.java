@@ -20,7 +20,7 @@ public class FileClient {
     FileWriter fw;
     FileClient()throws IOException//初始化
     {
-        SetProperties();
+        //SetProperties();
         host="";
        // port=GetHostPort();//得到主机地址和端口然后建立tcp连接
         port=GetProperties();
