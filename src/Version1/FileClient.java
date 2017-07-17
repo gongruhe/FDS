@@ -2,6 +2,9 @@ package Version1;
 import java.io.*;
 import java.net.*;
 import java.nio.file.*;
+import java.util.Enumeration;
+import java.util.Properties;
+
 /**
  * Created by 巩汝何 on 2017/7/11.
  * 栗仁武 201592169
@@ -17,8 +20,10 @@ public class FileClient {
     FileWriter fw;
     FileClient()throws IOException//初始化
     {
+        SetProperties();
         host="";
-        port=GetHostPort();//得到主机地址和端口然后建立tcp连接
+       // port=GetHostPort();//得到主机地址和端口然后建立tcp连接
+        port=GetProperties();
         s=new Socket(host,port);
         dis = new DataInputStream(s.getInputStream());
         dos = new DataOutputStream(s.getOutputStream());
@@ -49,6 +54,25 @@ public class FileClient {
             }
         }
         return Integer.parseInt(ports);
+    }
+    int GetProperties() throws IOException {
+        String port;
+        Properties pps=new Properties();
+        pps.load(new FileInputStream("ClientSet.properties")) ;
+        host=pps.getProperty("ServerIp");
+        port=pps.getProperty("ServerPort");
+        UserName=pps.getProperty("Username");
+        return Integer.parseInt(port);
+    }
+    int SetProperties() throws IOException {
+        Properties pps=new Properties();
+        InputStream in=new FileInputStream("ClientSet.properties");
+        pps.load(in);
+        pps.setProperty("ServerIp","123.456.789.345");//
+        pps.setProperty("ServerPort","4321");
+        pps.setProperty("Username","LiRenWu");
+        //OutputStream out=new FileOutputStream("ClientSet.properties");
+        return 0;
     }
     public void main(String args[]) throws Exception {
         switch (args[0])
