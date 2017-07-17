@@ -18,11 +18,11 @@ public class StorageNode {
     String Serverport;
     String ip;
     StorageNode() throws IOException {
-
-        new Thread(new SNodeServerThread(info.getPort(),info)
-        ).start();
-        Serverip= (Inet4Address) Inet4Address.getByName(ip);//得到服务器的地址
         int port=GetServerHost();
+        Serverip= (Inet4Address) Inet4Address.getByName(ip);//得到服务器的地址
+        //三个线程
+        new Thread(new SNodeServerThread(info.getPort(),info,Serverip,port)
+        ).start();
         new Thread(new SNodeUDPSenderT(port,Serverip,info)).start();
         new Thread(new SNodeUDPServerT(port,Serverip)).start();
 
